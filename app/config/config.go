@@ -1,16 +1,10 @@
 package config
 
-type DatabaseConfig interface {
-	Type() string
-	Host() string
-	User() string
-	Password() string
-	Port() int
-}
+import "horgh-consumer/app/services/eventbus/kafka"
 
-type EventBusConfig interface{}
+type DatabaseConfig interface{}
 
 type Config struct {
-	Database       DatabaseConfig
-	EventBusConfig EventBusConfig
+	//Database       DatabaseConfig
+	EventBusConfig kafka.Config
 }

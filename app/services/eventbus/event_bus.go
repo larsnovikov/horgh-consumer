@@ -2,7 +2,6 @@ package eventbus
 
 import (
 	"context"
-	"horgh-consumer/app/config"
 	"horgh-consumer/app/services/eventbus/kafka"
 )
 
@@ -18,7 +17,7 @@ type Client interface {
 	Consume(ctx context.Context) error
 }
 
-func New(conf config.EventBusConfig) Implementation {
+func New(conf kafka.Config) Implementation {
 	return Implementation{
 		client: kafka.New(conf),
 	}

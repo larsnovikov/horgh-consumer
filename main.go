@@ -1,7 +1,14 @@
 package main
 
-import "horgh-consumer/app"
+import (
+	"horgh-consumer/app"
+)
 
 func main() {
-	app.New()
+	application, err := app.New()
+	if err != nil {
+		panic(err)
+	}
+
+	application.Wait()
 }

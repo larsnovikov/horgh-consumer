@@ -3,10 +3,6 @@ package database
 import (
 	"context"
 	"horgh-consumer/app/config"
-	"horgh-consumer/app/services/database/clickhouse"
-	"horgh-consumer/app/services/database/mysql"
-	"horgh-consumer/app/services/database/postgresql"
-	"horgh-consumer/app/services/database/vertica"
 )
 
 const (
@@ -42,17 +38,18 @@ type Client interface {
 
 func New(conf config.DatabaseConfig) Implementation {
 	i := Implementation{}
-
-	switch slaveType(conf.Type()) {
-	case typeClickhouse:
-		i.client = clickhouse.New(conf)
-	case typeVertica:
-		i.client = vertica.New(conf)
-	case typeMysql:
-		i.client = mysql.New(conf)
-	case typePostgresql:
-		i.client = postgresql.New(conf)
-	}
-
+	// TODO
 	return i
+	//switch slaveType(conf.Type()) {
+	//case typeClickhouse:
+	//	i.client = clickhouse.New(conf)
+	//case typeVertica:
+	//	i.client = vertica.New(conf)
+	//case typeMysql:
+	//	i.client = mysql.New(conf)
+	//case typePostgresql:
+	//	i.client = postgresql.New(conf)
+	//}
+	//
+	//return i
 }
