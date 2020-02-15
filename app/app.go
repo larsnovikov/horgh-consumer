@@ -8,6 +8,7 @@ import (
 	"horgh-consumer/app/processors"
 	"horgh-consumer/app/services/database"
 	"horgh-consumer/app/services/eventbus"
+	"horgh-consumer/app/utils/logger"
 )
 
 type Application struct {
@@ -18,6 +19,10 @@ type Transport interface{}
 
 func New() (Application, error) {
 	ctx := context.Background()
+	ctx, err := logger.Set(ctx)
+	if err != nil {
+		return Application{}, err
+	}
 
 	conf := config.Config{}
 	if err := envconfig.Init(&conf); err != nil {
