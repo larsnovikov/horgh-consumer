@@ -35,17 +35,21 @@ func (i Implementation) handle(ctx context.Context, reader *kafka.Reader, handle
 	m, err := reader.ReadMessage(context.Background())
 	if err != nil {
 		// todo log
+		fmt.Println("222")
 		return
 	}
 
 	msg, err := entities.Parse(string(m.Value))
 	if err != nil {
+		fmt.Println(err)
+		fmt.Println(string(m.Value))
 		// todo log
 		return
 	}
 
 	if err = handler(ctx, msg); err != nil {
 		// todo log
+		fmt.Println("222")
 		return
 	}
 
@@ -57,11 +61,9 @@ func New(conf Config) Implementation {
 	for _, topic := range conf.Topics {
 		fmt.Println("Create reader for " + topic)
 		readers = append(readers, kafka.NewReader(kafka.ReaderConfig{
-			Brokers:  conf.Hosts,
-			GroupID:  conf.ConsumerGroup,
-			Topic:    topic,
-			MinBytes: 10e3, // 10KB
-			MaxBytes: 10e6, // 10MB
+			Brokers: conf.Hosts,
+			GroupID: conf.ConsumerGroup,
+			Topic:   topic,
 		}))
 	}
 
