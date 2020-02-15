@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/segmentio/kafka-go"
 	"horgh-consumer/app/entities"
+	"horgh-consumer/app/utils/logger"
 )
 
 type Implementation struct {
@@ -26,34 +27,37 @@ func (i Implementation) consume(ctx context.Context, reader *kafka.Reader, handl
 }
 
 func (i Implementation) handle(ctx context.Context, reader *kafka.Reader, handler func(ctx context.Context, message entities.Query) error) {
+	simpleLogger := logger.Get(ctx)
+	var outErr error
+
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered in f", r)
+			outErr = r.(error)
+		}
+
+		if outErr != nil {
+			simpleLogger.Error(fmt.Sprintf("Handle message error: %s", outErr.Error()))
 		}
 	}()
 
-	m, err := reader.ReadMessage(context.Background())
+	m, err := reader.FetchMessage(context.Background())
 	if err != nil {
-		// todo log
-		fmt.Println("222")
+		outErr = err
 		return
 	}
 
 	msg, err := entities.Parse(string(m.Value))
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println(string(m.Value))
-		// todo log
+		outErr = err
 		return
 	}
 
 	if err = handler(ctx, msg); err != nil {
-		// todo log
-		fmt.Println("222")
+		outErr = err
 		return
 	}
 
-	fmt.Printf("message at topic/partition/offset %v/%v/%v: %s = %s\n", m.Topic, m.Partition, m.Offset, string(m.Key), string(m.Value))
+	outErr = reader.CommitMessages(ctx, m)
 }
 
 func New(conf Config) Implementation {
