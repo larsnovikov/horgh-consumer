@@ -4,27 +4,28 @@ import (
 	"context"
 	"fmt"
 	"github.com/segmentio/kafka-go"
+	"horgh-consumer/app/entities"
 )
 
 type Implementation struct {
 	readers []*kafka.Reader
 }
 
-func (i Implementation) Consume(ctx context.Context) error {
+func (i Implementation) Consume(ctx context.Context, handler func(ctx context.Context, message entities.Query) error) error {
 	for _, reader := range i.readers {
-		go i.consume(ctx, reader)
+		go i.consume(ctx, reader, handler)
 	}
 
 	return nil
 }
 
-func (i Implementation) consume(ctx context.Context, reader *kafka.Reader) {
+func (i Implementation) consume(ctx context.Context, reader *kafka.Reader, handler func(ctx context.Context, message entities.Query) error) {
 	for {
-		i.handle(ctx, reader)
+		i.handle(ctx, reader, handler)
 	}
 }
 
-func (i Implementation) handle(ctx context.Context, reader *kafka.Reader) {
+func (i Implementation) handle(ctx context.Context, reader *kafka.Reader, handler func(ctx context.Context, message entities.Query) error) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in f", r)
@@ -33,6 +34,17 @@ func (i Implementation) handle(ctx context.Context, reader *kafka.Reader) {
 
 	m, err := reader.ReadMessage(context.Background())
 	if err != nil {
+		// todo log
+		return
+	}
+
+	msg, err := entities.Parse(string(m.Value))
+	if err != nil {
+		// todo log
+		return
+	}
+
+	if err = handler(ctx, msg); err != nil {
 		// todo log
 		return
 	}

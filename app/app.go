@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"github.com/vrischmann/envconfig"
 	"horgh-consumer/app/config"
@@ -10,14 +11,14 @@ import (
 )
 
 type Application struct {
-	Processors Processors
-	Transport  Transport
+	Transport Transport
 }
 
-type Processors interface{}
 type Transport interface{}
 
 func New() (Application, error) {
+	ctx := context.Background()
+
 	conf := config.Config{}
 	if err := envconfig.Init(&conf); err != nil {
 		return Application{}, err
@@ -25,10 +26,15 @@ func New() (Application, error) {
 
 	var tmpDbConfig struct{}
 	db := database.New(tmpDbConfig)
+	proc := processors.New(db)
+	eb := eventbus.New(conf.EventBusConfig)
+
+	if err := eb.Consume(ctx, proc.Replication.Handle); err != nil {
+		return Application{}, err
+	}
 
 	return Application{
-		Transport:  eventbus.New(conf.EventBusConfig),
-		Processors: processors.New(db),
+		Transport: eb,
 	}, nil
 }
 

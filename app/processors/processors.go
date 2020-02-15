@@ -3,21 +3,22 @@ package processors
 import (
 	"context"
 	"fmt"
+	"horgh-consumer/app/entities"
 	"horgh-consumer/app/processors/replication"
 	"horgh-consumer/app/services"
 )
 
 type Processors struct {
-	replication Replication
+	Replication Replication
 }
 
 type Replication interface {
-	Handle(ctx context.Context)
+	Handle(ctx context.Context, message entities.Query) error
 }
 
 func New(database services.Database) Processors {
 	fmt.Println("Create processors")
 	return Processors{
-		replication: replication.New(database),
+		Replication: replication.New(database),
 	}
 }
