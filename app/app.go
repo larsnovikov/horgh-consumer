@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"github.com/vrischmann/envconfig"
 	"horgh-consumer/app/config"
 	"horgh-consumer/app/entities"
 	"horgh-consumer/app/processors"
@@ -10,6 +9,7 @@ import (
 	"horgh-consumer/app/services/eventbus"
 	"horgh-consumer/app/utils/healthcheck"
 	"horgh-consumer/app/utils/logger"
+	"os"
 )
 
 type Application struct {
@@ -29,8 +29,8 @@ func New() (Application, error) {
 		return Application{}, err
 	}
 
-	conf := config.Config{}
-	if err := envconfig.Init(&conf); err != nil {
+	conf, err := config.New(os.Getenv("SLAVE_TYPE"))
+	if err != nil {
 		return Application{}, err
 	}
 

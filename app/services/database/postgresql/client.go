@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"context"
-	"horgh-consumer/app/config"
 )
 
 type Implementation struct {
@@ -20,6 +19,6 @@ func (i Implementation) Update(ctx context.Context) error {
 	return nil
 }
 
-func New(conf config.DatabaseConfig) Implementation {
+func New(conf Config) Implementation {
 	return Implementation{}
 }
