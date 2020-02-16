@@ -10,5 +10,5 @@ func main() {
 		panic(err)
 	}
 
-	application.Wait()
+	application.HealthCheck()
 }

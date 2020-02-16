@@ -14,12 +14,21 @@ func (i Implementation) Consume(ctx context.Context, handler func(ctx context.Co
 	return i.client.Consume(ctx, handler)
 }
 
-type Client interface {
-	Consume(ctx context.Context, handler func(ctx context.Context, message entities.Query) error) error
+func (i Implementation) HealthCheck() entities.HealthCheck {
+	return i.client.HealthCheck()
 }
 
-func New(conf kafka.Config) Implementation {
-	return Implementation{
-		client: kafka.New(conf),
+type Client interface {
+	Consume(ctx context.Context, handler func(ctx context.Context, message entities.Query) error) error
+	HealthCheck() entities.HealthCheck
+}
+
+func New(conf kafka.Config) (Implementation, error) {
+	kafkaClient, err := kafka.New(conf)
+	if err != nil {
+		return Implementation{}, err
 	}
+	return Implementation{
+		client: kafkaClient,
+	}, nil
 }

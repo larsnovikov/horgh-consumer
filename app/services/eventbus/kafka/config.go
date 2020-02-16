@@ -1,7 +1,7 @@
 package kafka
 
 type Config struct {
-	Hosts         []string `envconfig:"Hosts"`
-	Topics        []string `envconfig:"Topics"`
-	ConsumerGroup string   `envconfig:"ConsumerGroup"`
+	Hosts         []string `envconfig:"KAFKA_HOSTS"`
+	Topics        []string `envconfig:"KAFKA_TOPICS"`
+	ConsumerGroup string   `envconfig:"KAFKA_CONSUMER_GROUP"`
 }

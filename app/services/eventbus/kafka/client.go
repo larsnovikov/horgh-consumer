@@ -10,6 +10,16 @@ import (
 
 type Implementation struct {
 	readers []*kafka.Reader
+	conn    *kafka.Conn
+}
+
+func (i Implementation) HealthCheck() entities.HealthCheck {
+	brokers, err := i.conn.Brokers()
+
+	return entities.HealthCheck{
+		ServiceName: "kafka",
+		Value:       len(brokers) > 0 && err == nil,
+	}
 }
 
 func (i Implementation) Consume(ctx context.Context, handler func(ctx context.Context, message entities.Query) error) error {
@@ -60,8 +70,11 @@ func (i Implementation) handle(ctx context.Context, reader *kafka.Reader, handle
 	outErr = reader.CommitMessages(ctx, m)
 }
 
-func New(conf Config) Implementation {
+func New(conf Config) (Implementation, error) {
 	var readers []*kafka.Reader
+	var conn *kafka.Conn
+	var err error
+
 	for _, topic := range conf.Topics {
 		fmt.Println("Create reader for " + topic)
 		readers = append(readers, kafka.NewReader(kafka.ReaderConfig{
@@ -69,9 +82,17 @@ func New(conf Config) Implementation {
 			GroupID: conf.ConsumerGroup,
 			Topic:   topic,
 		}))
+
+		if conn == nil {
+			conn, err = kafka.DialLeader(context.Background(), "tcp", conf.Hosts[0], topic, 0)
+			if err != nil {
+				return Implementation{}, err
+			}
+		}
 	}
 
 	return Implementation{
 		readers: readers,
-	}
+		conn:    conn,
+	}, nil
 }
