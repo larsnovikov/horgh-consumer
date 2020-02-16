@@ -46,13 +46,11 @@ func New() (Application, error) {
 		return Application{}, err
 	}
 
-	hc := healthcheck.New(conf.HealthCheck, []func() entities.HealthCheck{
-		eb.HealthCheck,
-	})
-
 	return Application{
-		transport:   eb,
-		healthCheck: hc,
+		transport: eb,
+		healthCheck: healthcheck.New(conf.HealthCheck, []func() entities.HealthCheck{
+			eb.HealthCheck,
+		}),
 	}, nil
 }
 

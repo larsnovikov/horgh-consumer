@@ -46,7 +46,7 @@ func (i Implementation) Handle() {
 		if err != nil {
 			// TODO log
 		}
-
+		w.Header().Add("Content-Type", "application/json")
 		fmt.Fprintf(w, out)
 	})
 
